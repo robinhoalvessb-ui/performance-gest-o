@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Expense, Student, UserRole, PaymentStatus } from '../types';
-import { analyzeFinancials } from '../services/geminiService';
-import { DollarSign, TrendingUp, TrendingDown, Brain, Loader2, UploadCloud, Plus, Trash2, ArrowDownWideNarrow, ArrowUpNarrowWide } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import { DollarSign, TrendingUp, TrendingDown, UploadCloud, Plus, Trash2, ArrowDownWideNarrow, ArrowUpNarrowWide } from 'lucide-react';
 
 interface FinancialsProps {
     students: Student[];
@@ -14,8 +12,6 @@ interface FinancialsProps {
 
 export const Financials: React.FC<FinancialsProps> = ({ students, expenses, role, onAddExpense, onDeleteExpense }) => {
     const [activeTab, setActiveTab] = useState<'overview' | 'expenses'>('overview');
-    const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
-    const [loadingAi, setLoadingAi] = useState(false);
 
     // Sorting State
     const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
@@ -33,13 +29,6 @@ export const Financials: React.FC<FinancialsProps> = ({ students, expenses, role
         acc + s.installments.filter(i => i.status === PaymentStatus.PAID).reduce((sum, i) => sum + i.amount, 0), 0
     );
     const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
-
-    const handleAiAnalysis = async () => {
-        setLoadingAi(true);
-        const result = await analyzeFinancials(students, expenses);
-        setAiAnalysis(result);
-        setLoadingAi(false);
-    };
 
     const handleAddExpense = (e: React.FormEvent) => {
         e.preventDefault();
@@ -119,48 +108,6 @@ export const Financials: React.FC<FinancialsProps> = ({ students, expenses, role
                                 R$ {(revenue - totalExpenses).toLocaleString('pt-BR')}
                             </span>
                         </div>
-                    </div>
-
-                    {/* AI Analysis Section */}
-                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 shadow-xl">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="bg-purple-500/20 p-2 rounded-lg">
-                                <Brain className="text-purple-400 w-6 h-6" />
-                            </div>
-                            <h3 className="text-lg font-bold text-white">Performance AI Intelligence</h3>
-                        </div>
-                        
-                        {!aiAnalysis && !loadingAi && (
-                            <div className="text-center py-8">
-                                <p className="text-slate-400 mb-4">Utilize a inteligência artificial para analisar seus dados financeiros e receber recomendações estratégicas.</p>
-                                <button 
-                                    onClick={handleAiAnalysis}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center gap-2"
-                                >
-                                    <Brain size={18} />
-                                    Gerar Relatório Inteligente
-                                </button>
-                            </div>
-                        )}
-
-                        {loadingAi && (
-                            <div className="flex flex-col items-center justify-center py-12">
-                                <Loader2 className="w-8 h-8 text-purple-500 animate-spin mb-4" />
-                                <p className="text-slate-300">Analisando dados com Gemini...</p>
-                            </div>
-                        )}
-
-                        {aiAnalysis && (
-                            <div className="prose prose-invert max-w-none bg-slate-950/50 p-6 rounded-lg border border-slate-800">
-                                <ReactMarkdown>{aiAnalysis}</ReactMarkdown>
-                                <button 
-                                    onClick={() => setAiAnalysis(null)}
-                                    className="mt-4 text-sm text-purple-400 hover:text-purple-300 underline"
-                                >
-                                    Limpar Análise
-                                </button>
-                            </div>
-                        )}
                     </div>
                 </div>
             )}
